@@ -1,0 +1,346 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: :"Create VPC with Public and private subnets"
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        Label:
+          default: "VPC CIDR"
+        Parameters:
+          - vpcCidr
+      -
+        Label:
+          default: "Subnet-Cidr"
+        Parameters:
+          - publicSubnet1Cidr  
+          - publicSubnet2Cidr  
+          - privateSubnet1Cidr  
+          - privateSubnet2Cidr  
+          - privateSubnet3Cidr  
+          - privateSubnet4Cidr  
+      -
+        Label:
+          default: "SHH CIDR" 
+        Parameters:
+          - SSHLocation  
+ 
+
+Parameters:
+  vpcCidr: # logical name 
+      Default: 10.0.0.0/16
+      Description: Enter the Ip range for this Vpc
+      Type: String
+      
+  publicSubnet1Cidr: # logical name 
+      Default: 10.0.0.0/24
+      Description: Enter the Ip range for the publicSubnet 1
+      Type: String    
+
+  publicSubnet2Cidr: # logical name 
+      Default: 10.0.1.0/24
+      Description: Enter the Ip range for the publicSubnet 2
+      Type: String   
+
+  privateSubnet1Cidr: # logical name 
+    Default: 10.0.2.0/24
+    Description: Enter the Ip range for the publicSubnet 1
+    Type: String 
+
+  privateSubnet2Cidr: # logical name 
+      Default: 10.0.3.0/24
+      Description: Enter the Ip range for the publicSubnet 2
+      Type: String  
+
+  privateSubnet3Cidr: # logical name 
+      Default: 10.0.4.0/24
+      Description: Enter the Ip range for the publicSubnet 3
+      Type: String      
+
+  privateSubnet4Cidr: # logical name 
+      Default: 10.0.5.0/24
+      Description: Enter the Ip range for the publicSubnet 4
+      Type: String    
+
+  SSHLocation:
+      AllowedPattern: '(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})' # digital value from 1 to 3 , from 1 to 2
+      ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
+      Default: 0.0.0.0/0
+      Description: The IP address range that can be used to access the web server using SSH.
+      MaxLength: '18'
+      MinLength: '9'
+      Type: String   
+
+    
+
+
+Resources:
+  # Create VPC
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref vpcCidr
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: Test VPC
+
+# Create Internet Gateway
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: Test IG
+
+# Attach Internet Gateway to VPC
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+
+# Create Public Subnet1
+  PublicSubnet1: 
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [ 0, !GetAZs  '' ] #select a list of AZ in that region and CloudFormation pick the first AZ in that list [0]
+      CidrBlock: !Ref publicSubnet1Cidr
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: Test PublicSubnet1
+      VpcId: !Ref VPC
+
+# Create Public Subnet2
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
+      CidrBlock: !Ref publicSubnet2Cidr
+      MapPublicIpOnLaunch: true
+      Tags: 
+        - Key: Name
+          Value: Test PublicSubnet2
+      VpcId: !Ref VPC
+
+# Create Route Table
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: Name
+          Value: Test PublicRouteTable
+      VpcId:  !Ref VPC
+
+# Add a Public Route to the Route Table
+  PublicRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref PublicRouteTable
+
+# Associate Public Subnet1 with Public Route Table
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet1
+
+# Associate Public Subnet2 with Public Route Table
+  PublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet2
+
+# Create Private Subnet1
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [ 0, !GetAZs  '' ]
+      CidrBlock:  !Ref privateSubnet1Cidr
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key:  Name
+          Value:  Test Subnet1 | AppTier
+      VpcId:  !Ref VPC
+
+# Create Private Subnet2
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:  !Select [ 1, !GetAZs  '' ]
+      CidrBlock:  !Ref privateSubnet2Cidr
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key:  Name
+          Value:  Test Subnet2 | AppTier
+      VpcId:  !Ref VPC
+
+# Create Private Subnet3
+  PrivateSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock:  !Ref privateSubnet3Cidr
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key:  Name
+          Value:  Test Subnet3 | DatabaseTier
+      VpcId:  !Ref VPC
+
+# Create Private Subnet4
+  PrivateSubnet4:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [ 1, !GetAZs  '' ]
+      CidrBlock:  !Ref privateSubnet4Cidr
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key:  Name
+          Value:  Test Subnet4 | DatabaseTier
+      VpcId:  !Ref VPC
+
+# Create Security Group for the Application Load Balancer 
+  ALBSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Enable HTTP/HTTPS access on port 80/443
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort:  80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key:  Name
+          Value: Test ALBSecurityGroup
+      VpcId:  !Ref VPC
+
+# Create Security Group for the Bastion Host aka Jump Box
+  SSHSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Enable SSH access on port 22
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref SSHLocation
+      Tags:
+        - Key:  Name
+          Value: Test SSHSecurityGroup
+      VpcId:  !Ref VPC
+
+# Create Security Group for the Web Server
+  WebServerSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Enable HTTP/HTTPS access via  port 80/443 locked down to Load balancer
+      SecurityGroupIngress:
+        - IpProtocol: tcp 
+          FromPort:  80
+          ToPort:  80 
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+        - IpProtocol: tcp 
+          FromPort: 443
+          ToPort: 443
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+        - IpProtocol: tcp 
+          FromPort: 22
+          ToPort: 22
+          SourceSecurityGroupId: !Ref SSHSecurityGroup
+      Tags:
+        - Key:  Name
+          Value:  Test WebServerSecurityGroup
+      VpcId:  !Ref VPC
+
+# Create Security Group for the DataBase
+  DataBaseSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Open Db for access
+      SecurityGroupIngress:
+        - IpProtocol: tcp 
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !Ref WebServerSecurityGroup
+      Tags:
+        - Key:  Name  
+          Value: Test DataBaseSecurityGroup
+      VpcId:  !Ref VPC
+
+Outputs:
+  VPC:
+    Description: VPC ID
+    Export:
+      Name: !Sub ${AWS::StackName}-VPC # returns our StackName and combines it with VPC word ..This can be anything
+    Value:  !Ref VPC
+
+  publicSubnet1:
+    Description: publicSubnet1 ID
+    Export:
+      Name: !Sub ${AWS::StackName}-publicSubnet1 # returns our StackName and combines it with VPC word ..This can be anything
+    Value:  !Ref PublicSubnet1  
+
+  publicSubnet2:
+    Description: publicSubnet2 ID
+    Export:
+      Name: !Sub ${AWS::StackName}-publicSubnet2 # returns our StackName and combines it with VPC word ..This can be anything
+    Value:  !Ref PublicSubnet2    
+
+  privateSubnet1:
+    Description: privateSubnet1 ID
+    Export:
+      Name: !Sub ${AWS::StackName}-privateSubnet1 # returns our StackName and combines it with VPC word ..This can be anything
+    Value:  !Ref PrivateSubnet1   
+
+
+  privateSubnet2:
+    Description: privateSubnet2 ID
+    Export:
+      Name: !Sub ${AWS::StackName}-privateSubnet2 # returns our StackName and combines it with VPC word ..This can be anything
+    Value:  !Ref PrivateSubnet2 
+
+  privateSubnet3:
+    Description: privateSubnet3 ID
+    Export:
+      Name: !Sub ${AWS::StackName}-privateSubnet3 # returns our StackName and combines it with VPC word ..This can be anything
+    Value:  !Ref PrivateSubnet3   
+
+  privateSubnet4:
+    Description: privateSubnet4 ID
+    Export:
+      Name: !Sub ${AWS::StackName}-privateSubnet4 # returns our StackName and combines it with VPC word ..This can be anything
+    Value:  !Ref PrivateSubnet4 
+
+  ALBSecurityGroup:
+    Description: ALBSecurityGroup ID
+    Export:
+      Name: !Sub ${AWS::StackName}-ALBSecurityGroup # returns our StackName and combines it with VPC word ..This can be anything
+    Value:  !Ref ALBSecurityGroup 
+
+  SSHSecurityGroup:
+    Description: SSHSecurityGroup ID
+    Export:
+      Name: !Sub ${AWS::StackName}-SSHSecurityGroup # returns our StackName and combines it with VPC word ..This can be anything
+    Value:  !Ref SSHSecurityGroup     
+
+  WebServerSecurityGroup:
+    Description: WebServerSecurityGroup ID
+    Export:
+      Name: !Sub ${AWS::StackName}-WebServerSecurityGroup # returns our StackName and combines it with VPC word ..This can be anything
+    Value:  !Ref WebServerSecurityGroup     
+
+  DataBaseSecurityGroup:
+    Description: DataBaseSecurityGroup ID
+    Export:
+      Name: !Sub ${AWS::StackName}-DataBaseSecurityGroup # returns our StackName and combines it with VPC word ..This can be anything
+    Value:  !Ref DataBaseSecurityGroup      

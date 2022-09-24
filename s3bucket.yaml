@@ -1,0 +1,42 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: :"Create S3 Bucket and EC2 Instance"
+
+Parameters:
+  S3BuckectName:
+      Description: Enter BucketName
+      Type: String
+      MinLength: "3"
+      MaxLength: "30"
+      AllowedPattern: "[A-Za-z0-9]+"
+
+  InstanceTypeParameter:
+      Description: Enter t2.micro, m1.small, or m1.large. Default is t2.micro . 
+      Type: String
+      Default: t2.micro
+      AllowedValues: 
+        - t2.micro
+        - m1.small
+        - m1.large
+      
+
+Resources:
+  S3Bucket: # logical name       
+    Type: AWS::S3::Bucket
+    Properties: 
+      BucketName: !Ref S3BuckectName
+
+  EC2Instance:  # logical name  
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref  InstanceTypeParameter  
+      ImageId: ami-026b57f3c383c2eec
+      Tags:
+        - Key: "Name"
+          Value: "my-ec2"
+      
+
+Outputs:
+    BucketName:
+        Value: !Ref S3Bucket      
+    InstanceType: 
+        Value:  !Ref  InstanceTypeParameter 

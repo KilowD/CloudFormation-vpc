@@ -1,0 +1,15 @@
+#   Steps tro create VPC in the management Console
+#1. Create VPC
+#2. Create Internet gateway
+#3. Attach the Internet gateway to the VPC
+#4. Create public Subnets
+#5. Create Public Route Table
+#6. Add public Route to the Public Route Table
+#7. Associate the public Subnets with the Public Route Table
+#8. Create the Private Subnets
+#9. Create the Security Groups
+   - Create Security Group for the Application Load Balancer 
+   - Create Security Group for the Bastion Host aka Jump Box
+   - Create Security Group for the Web Server
+   - Create Security Group for the DataBase
+
