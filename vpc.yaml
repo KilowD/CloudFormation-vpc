@@ -287,60 +287,60 @@ Outputs:
   publicSubnet1:
     Description: publicSubnet1 ID
     Export:
-      Name: !Sub ${AWS::StackName}-publicSubnet1 # returns our StackName and combines it with VPC word ..This can be anything
+      Name: !Sub ${AWS::StackName}-publicSubnet1 
     Value:  !Ref PublicSubnet1  
 
   publicSubnet2:
     Description: publicSubnet2 ID
     Export:
-      Name: !Sub ${AWS::StackName}-publicSubnet2 # returns our StackName and combines it with VPC word ..This can be anything
+      Name: !Sub ${AWS::StackName}-publicSubnet2 
     Value:  !Ref PublicSubnet2    
 
   privateSubnet1:
     Description: privateSubnet1 ID
     Export:
-      Name: !Sub ${AWS::StackName}-privateSubnet1 # returns our StackName and combines it with VPC word ..This can be anything
+      Name: !Sub ${AWS::StackName}-privateSubnet1 
     Value:  !Ref PrivateSubnet1   
 
 
   privateSubnet2:
     Description: privateSubnet2 ID
     Export:
-      Name: !Sub ${AWS::StackName}-privateSubnet2 # returns our StackName and combines it with VPC word ..This can be anything
+      Name: !Sub ${AWS::StackName}-privateSubnet2 
     Value:  !Ref PrivateSubnet2 
 
   privateSubnet3:
     Description: privateSubnet3 ID
     Export:
-      Name: !Sub ${AWS::StackName}-privateSubnet3 # returns our StackName and combines it with VPC word ..This can be anything
+      Name: !Sub ${AWS::StackName}-privateSubnet3 
     Value:  !Ref PrivateSubnet3   
 
   privateSubnet4:
     Description: privateSubnet4 ID
     Export:
-      Name: !Sub ${AWS::StackName}-privateSubnet4 # returns our StackName and combines it with VPC word ..This can be anything
+      Name: !Sub ${AWS::StackName}-privateSubnet4 
     Value:  !Ref PrivateSubnet4 
 
   ALBSecurityGroup:
     Description: ALBSecurityGroup ID
     Export:
-      Name: !Sub ${AWS::StackName}-ALBSecurityGroup # returns our StackName and combines it with VPC word ..This can be anything
+      Name: !Sub ${AWS::StackName}-ALBSecurityGroup 
     Value:  !Ref ALBSecurityGroup 
 
   SSHSecurityGroup:
     Description: SSHSecurityGroup ID
     Export:
-      Name: !Sub ${AWS::StackName}-SSHSecurityGroup # returns our StackName and combines it with VPC word ..This can be anything
+      Name: !Sub ${AWS::StackName}-SSHSecurityGroup 
     Value:  !Ref SSHSecurityGroup     
 
   WebServerSecurityGroup:
     Description: WebServerSecurityGroup ID
     Export:
-      Name: !Sub ${AWS::StackName}-WebServerSecurityGroup # returns our StackName and combines it with VPC word ..This can be anything
+      Name: !Sub ${AWS::StackName}-WebServerSecurityGroup 
     Value:  !Ref WebServerSecurityGroup     
 
   DataBaseSecurityGroup:
     Description: DataBaseSecurityGroup ID
     Export:
-      Name: !Sub ${AWS::StackName}-DataBaseSecurityGroup # returns our StackName and combines it with VPC word ..This can be anything
+      Name: !Sub ${AWS::StackName}-DataBaseSecurityGroup 
     Value:  !Ref DataBaseSecurityGroup      
