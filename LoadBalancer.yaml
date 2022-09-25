@@ -28,7 +28,7 @@ Parameters:
     Type:  String
 
 
- Resources:
+Resources:
 #Create an Application Load Balancer.Must always be in the public Subnets
   ApplicationLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
@@ -54,7 +54,7 @@ Parameters:
           Type: redirect
       LoadBalancerArn:  !Ref ApplicationLoadBalancer
       Port: 80
-      Protocol: http
+      Protocol: HTTP
 
 #Create a Listener on Port 443
   ALBListenerSslCertificate:
@@ -67,7 +67,7 @@ Parameters:
           TargetGroupArn: !Ref ALBTargetGroup
       LoadBalancerArn:  !Ref ApplicationLoadBalancer
       Port: 443
-      Protocol: https
+      Protocol: HTTPS
 
 # Create a Target Group
   ALBTargetGroup:
@@ -79,12 +79,12 @@ Parameters:
       HealthyThresholdCount:  2
       Matcher:
         HttpCode: 200,302
-      Name: MyWebService
+      Name: MyWebServer
       Port: 80
-      Protocol: http
+      Protocol: HTTP
       UnhealthyThresholdCount:  5
       VpcId:  
-        Fn::ImportValue:  !Sub ${ExportVpcStackName}-VPC
+        Fn::ImportValue: !Sub ${ExportVpcStackName}-VPC
 
 Outputs:
 # Export Target Group
