@@ -1,0 +1,139 @@
+AWSTemplateFormatVersion:  "2010-09-09"
+
+Description:  "This template creates a RDS database with MYSQL 5.7 engine in each public subnet "
+
+
+Metadata:
+  AWS::CloudFormation::Interface: 
+    ParameterGroups:
+      - 
+        Label: 
+          default: Export VPC Stack Name
+        Parameters:
+          - ExportVpcStackName
+      - 
+        Label: 
+          default: Database Parameters
+        Parameters:
+          - DatabaseInstanceIdentifier
+          - DatabaseName
+          - DatabaseUser
+          - DatabasePassword
+          - DatabaseBackupRetentionPeriod
+          - DatabaseAllocatedStorage
+          - DatabaseInstanceClass
+          - MultiAZDatabase
+ 
+
+
+Parameters:
+  ExportVpcStackName: # allows us to import some values from our vpc template
+    Description: The name of the vpc stack that exports values
+    Type: String
+
+  DatabaseInstanceIdentifier: # logical name
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*' 
+    ConstraintDescription: 1 to 60 alphanumeric characters or hyphens. First character must be a letter. Can't contain two consecutive hyphens. Can't end with a hyphen.
+    Default:  mysqlDB
+    Description: Instance Identifier name
+    MaxLength:  60
+    MinLength:  1
+    Type: String
+
+  DatabaseName:
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*' # first character has to be a letter
+    ConstraintDescription:  first character has to be a letter and contain only alphanumeric characters
+    Default:  applicationDB
+    Description:  mysqlDB name
+    MaxLength: 64
+    MinLength:  1
+    Type: String
+
+  DatabaseUser:
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*' # first character has to be a letter
+    ConstraintDescription:  first character has to be a letter and contain only alphanumeric characters
+    Default:  dbadmin
+    Description: username for mysqlDB
+    MaxLength: 16
+    MinLength:  1
+    NoEcho: true # it wont show the values u are typing
+    Type: String
+
+  DatabasePassword: 
+    AllowedPattern: '[a-zA-Z0-9]*' # the password can have a combination of lower, upper and numbers
+    ConstraintDescription:  must contain only alphanumeric characters
+    Default:  Test1234
+    Description: password for mysqlDB
+    MaxLength:  41
+    MinLength:  8
+    NoEcho: true
+    Type: String
+
+  DatabaseBackupRetentionPeriod:
+    ConstraintDescription:  Database backup retention period must be between 0 and 35 days
+    Default:  0 # i dont want to back it up
+    Description:  the number of days for which the DB snapshot are retained
+    MaxValue: 35
+    MinValue: 0
+    Type: Number
+
+  DatabaseAllocatedStorage:
+    ConstraintDescription:  Must be between 5 and 1024Gb
+    Default:  20
+    Description: The sizse of the DB
+    MaxValue: 1024
+    MinValue: 5
+    Type: Number
+
+  DatabaseInstanceClass:
+    AllowedValues:
+      - db.t1.micro
+      - db.t2.micro
+      - db.m1.small
+      - db.m1.medium
+      - db.m1.large
+    ConstraintDescription:   Must select a valid instance type
+    Default:  db.t2.micro
+    Description: database instance type
+    Type: String
+
+  MultiAZDatabase:
+    AllowedValues:
+      - true
+      - false
+    ConstraintDescription: Must be either true or false
+    Default:  false
+    Description:  creates a multi Availability Zone MySQL RDS database instance
+    Type: String
+
+Resources:   
+  DatabaseSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Subnet group for RDS database
+      SubnetIds: 
+        - Fn::ImportValue:  !Sub ${ExportVpcStackName}-privateSubnet3
+        - Fn::ImportValue:  !Sub ${ExportVpcStackName}-privateSubnet4
+      Tags:
+        - Key:  Name
+          Value:  DatabaseSubnets
+
+  DatabaseInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      AllocatedStorage: !Ref DatabaseAllocatedStorage
+      AvailabilityZone: !Select [ 0, !GetAZs  '' ] 
+      BackupRetentionPeriod:  !Ref DatabaseBackupRetentionPeriod
+      DBInstanceClass:  !Ref DatabaseInstanceClass
+      DBInstanceIdentifier: !Ref DatabaseInstanceIdentifier
+      DBName: !Ref  DatabaseName
+      DBSubnetGroupName:  !Ref DatabaseSubnetGroup
+      Engine: MySQL
+      EngineVersion:  5.7.33
+      MasterUsername: !Ref  DatabaseUser
+      MasterUserPassword: !Ref  DatabasePassword
+      MultiAZ:  !Ref MultiAZDatabase
+      VPCSecurityGroups:  
+        - Fn::ImportValue:  !Sub ${ExportVpcStackName}-DataBaseSecurityGroup
+
+

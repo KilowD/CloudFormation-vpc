@@ -3,7 +3,7 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description:  "This template creates a NAT gateway in each public subnet "
  
 Parameters:
-  ExportVpcStackName:
+  ExportVpcStackName:  # Logical Name
     Description: The name of the Vpc Stack that exports values
     Type: String
 
