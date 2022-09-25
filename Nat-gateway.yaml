@@ -76,7 +76,7 @@ Resources:
         Fn::ImportValue:  !Sub ${ExportVpcStackName}-privateSubnet1
 
 # Associate Private Subnet3 with Private Route Table 1
-  PrivateSubnet1RouteTableAssociation:
+  PrivateSubnet3RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties: 
       RouteTableId: !Ref PrivateRouteTable1
@@ -110,7 +110,7 @@ Resources:
         Fn::ImportValue:  !Sub ${ExportVpcStackName}-privateSubnet2
 
 # Associate Private Subnet4 with Private Route Table 2
-  PrivateSubnet2RouteTableAssociation:
+  PrivateSubnet4RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties: 
       RouteTableId: !Ref PrivateRouteTable2
