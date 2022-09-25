@@ -1,5 +1,5 @@
-AWSTemplateFormatVersion: 2010-09-09
-Description: :"Create VPC with Public and private subnets"
+AWSTemplateFormatVersion: "2010-09-09"
+Description: :"This template Creates a VPC with Public and private subnets"
 
 Metadata:
   AWS::CloudFormation::Interface:

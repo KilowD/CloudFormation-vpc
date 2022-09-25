@@ -1,6 +1,6 @@
 #   Steps tro create VPC in the management Console
 #1. Create VPC
-#2. Create Internet gateway
+#2. Create Internet gateway - allows the instances in your VPC to have access to the internet
 #3. Attach the Internet gateway to the VPC
 #4. Create public Subnets
 #5. Create Public Route Table

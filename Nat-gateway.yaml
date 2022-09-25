@@ -1,0 +1,119 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description:  "This template creates a NAT gateway in each public subnet "
+ 
+Parameters:
+  ExportVpcStackName:
+    Description: The name of the Vpc Stack that exports values
+    Type: String
+
+# Allocate Elastic IP Address (EIP1)
+Resources:
+  NatGateway1EIP: # Logical Name
+    Type: AWS::EC2::EIP
+    Properties: 
+      Domain: VPC
+      Tags: 
+        - Key: Name
+          Value: EIP-1
+
+# Allocate Elastic IP Address (EIP1)
+  NatGateway2EIP:
+    Type: AWS::EC2::EIP
+    Properties: 
+      Domain: VPC
+      Tags: 
+        - Key: Name
+          Value: EIP-2       
+
+# Create a Nat gateway in Public Subnet1
+  NatGateway1:
+    Type: AWS::EC2::NatGateway
+    Properties: 
+      AllocationId: !GetAtt NatGateway1EIP.AllocationId  # Id of the EIP1
+      SubnetId: 
+        Fn::ImportValue:  !Sub ${ExportVpcStackName}-publicSubnet1
+      Tags: 
+        - Key:  Name
+          Value: NatGateway Public Subnet1
+
+# Create a Nat gateway in Public Subnet2
+  NatGateway2:
+    Type: AWS::EC2::NatGateway
+    Properties: 
+      AllocationId: !GetAtt NatGateway2EIP.AllocationId  # Id of the EIP2
+      SubnetId: 
+        Fn::ImportValue:  !Sub ${ExportVpcStackName}-publicSubnet2
+      Tags: 
+        - Key:  Name
+          Value:  NatGateway Public Subnet2
+
+# Create Private Route Table 1
+  PrivateRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      Tags: 
+        - Key:  Name
+          Value: PrivateRouteTable1
+      VpcId: 
+        Fn::ImportValue:  !Sub ${ExportVpcStackName}-VPC
+
+
+# Add a Route to point internet bound traffic to Nat Gateway1
+  PrivateRoute1:
+    Type: AWS::EC2::Route
+    Properties: 
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway1
+      RouteTableId: !Ref PrivateRouteTable1
+
+# Associate Private Subnet1 with Private Route Table 1
+  PrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref PrivateRouteTable1
+      SubnetId: 
+        Fn::ImportValue:  !Sub ${ExportVpcStackName}-privateSubnet1
+
+# Associate Private Subnet3 with Private Route Table 1
+  PrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref PrivateRouteTable1
+      SubnetId: 
+        Fn::ImportValue:  !Sub ${ExportVpcStackName}-privateSubnet3
+ 
+# Create Private Route Table 2
+  PrivateRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      Tags: 
+        - Key:  Name
+          Value: PrivateRouteTable2
+      VpcId: 
+        Fn::ImportValue:  !Sub ${ExportVpcStackName}-VPC
+
+# Add a Route to point internet bound traffic to Nat Gateway2
+  PrivateRoute2:
+    Type: AWS::EC2::Route
+    Properties: 
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway2
+      RouteTableId: !Ref PrivateRouteTable2      
+ 
+# Associate Private Subnet2 with Private Route Table 2
+  PrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref PrivateRouteTable2
+      SubnetId: 
+        Fn::ImportValue:  !Sub ${ExportVpcStackName}-privateSubnet2
+
+# Associate Private Subnet4 with Private Route Table 2
+  PrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref PrivateRouteTable2
+      SubnetId: 
+        Fn::ImportValue:  !Sub ${ExportVpcStackName}-privateSubnet4        
+
