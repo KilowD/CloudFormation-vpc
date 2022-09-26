@@ -48,11 +48,6 @@ Conditions:
     !Or [!Equals [!Ref InstanceType, 't2.micro'], !Equals [!Ref InstanceType, 'm1.small']] 
 
 Resources:
-  S3Bucket: # logical name       
-    Type: AWS::S3::Bucket
-    Properties: 
-      BucketName: !Ref S3BuckectName
-
   EC2X86Instance:  # logical name  
     Type: AWS::EC2::Instance
     Condition:  CreateX86Resources # if this is true create the below
@@ -65,7 +60,7 @@ Resources:
           Value: "my-X86-ec2-Instance"
 
 
-    EC2ARMInstance:  # logical name  
+  EC2ARMInstance:  # logical name  
       Type: AWS::EC2::Instance
       Condition:  CreateARMResources # if this is true do the below
       Properties:
