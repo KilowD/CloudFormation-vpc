@@ -1,0 +1,79 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: :"This template creates an EC2 based on the region chosen"
+
+Metadata:
+  AWS::CloudFormation::Interface: 
+    ParameterGroups:
+      - 
+        Label: 
+          default: EC2 Parameters
+        Parameters:
+          - InstanceType
+      - 
+        Label: 
+          default: KeyPair Parameter
+        Parameters:
+          - KeyPair          
+          
+
+Parameters:
+  KeyPair:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
+    Type: 'AWS::EC2::KeyPair::KeyName'
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+
+  InstanceType:
+      Description: Enter t2.micro, m1.small, or m1.large. Default is t2.micro . 
+      Type: String
+      Default: t2.micro
+      AllowedValues: 
+        - t2.micro
+        - m1.small
+        - m1.large
+        - c6g.medium
+
+Mappings:
+  AMIRegionMap:
+    us-east-1: #key
+      "HVMG2": "ami-0636eac5d73e0e5d7"
+      "HVM64": "ami-026b57f3c383c2eec" 
+    us-east-2: #key
+      "HVMG2": "ami-0636eac5d73e0e5d7"
+      "HVM64": "ami-026b57f3c383c2eec" 
+
+Conditions:
+  CreateARMResources:
+    !Or [!Equals [!Ref InstanceType, 'c6g.medium'], !Equals [!Ref InstanceType, 'm1.large']]      
+  CreateX86Resources:
+    !Or [!Equals [!Ref InstanceType, 't2.micro'], !Equals [!Ref InstanceType, 'm1.small']] 
+
+Resources:
+  S3Bucket: # logical name       
+    Type: AWS::S3::Bucket
+    Properties: 
+      BucketName: !Ref S3BuckectName
+
+  EC2X86Instance:  # logical name  
+    Type: AWS::EC2::Instance
+    Condition:  CreateX86Resources # if this is true create the below
+    Properties:
+      InstanceType: !Ref  InstanceType
+      KeyName: !Ref KeyPair
+      ImageId: !FindInMap [AMIRegionMap, !Ref "AWS::Region",HVM64] # AWS::Region will detect the region were the template is being launched in
+      Tags:
+        - Key: "Name"
+          Value: "my-X86-ec2-Instance"
+
+
+    EC2ARMInstance:  # logical name  
+      Type: AWS::EC2::Instance
+      Condition:  CreateARMResources # if this is true do the below
+      Properties:
+        InstanceType: !Ref  InstanceType
+        KeyName: !Ref KeyPair
+        ImageId: !FindInMap [AMIRegionMap, !Ref "AWS::Region",HVMG2]
+        Tags:
+          - Key: "Name"
+            Value: "my-ARM-ec2-Instance"    
+
+
